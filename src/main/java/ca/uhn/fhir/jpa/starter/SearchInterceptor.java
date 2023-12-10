@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.starter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -29,10 +31,19 @@ public class SearchInterceptor extends InterceptorAdapter {
       if (keys.contains(k)) {
         try {
           LocalDate.parse(parameters.get(k)[0]);
-        } catch (Exception e) {
-          String message = String.format("Incorrect value for search parameter %s provided. %s should be of type date",
-              k, k);
-          throwInvalidRequestException(message);
+        } catch (Exception error) {
+          try {
+            LocalDateTime.parse(parameters.get(k)[0]);
+          } catch (Exception err) {
+            try {
+              OffsetDateTime.parse(parameters.get(k)[0]);
+            } catch (Exception e) {
+              String message = String.format(
+                  "Incorrect value for search parameter %s provided. %s should be of type date or date time",
+                  k, k);
+              throwInvalidRequestException(message);
+            }
+          }
         }
       }
     }
